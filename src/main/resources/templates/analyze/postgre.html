@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<th:block th:replace="~{/base/base::setContent(~{this::content})}">
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<th:block th:fragment="content">
+  <div class="row">
+    <div class="bg-body-frame col-md-7 mb-4">
+      <h5>Analyze PostgreSQL</h5>
+      <span class="text-secondary text-break">Analyzes the schema correlation of the PostgreSQL server based on the logged in information. The file is saved as .csv</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="bg-body-frame col-md-7 mb-4">
+      <form th:action="@{/analyze/postgre}" method="post">
+        <button type="submit" class="btn btn-primary">Analyze!</button>
+        <span class="text-secondary text-break ms-2">It will take few minutes.</span>
+      </form>
+    </div>
+    <div class="bg-body-frame col-md-7 mb-4">
+      <textarea class="form-control" th:text="${result != null ? result : 'Result'}" rows="15"></textarea>
+    </div>
+  </div>
+</th:block>
+</body>
+</html>
+</th:block>

@@ -1,0 +1,25 @@
+package co.kr.sothis.dbanalyzer.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests()
+//                .requestMatchers("/manifest.json", "/serviceworker.js", "/assets/**", "css/**", "fonts/**", "/js/**", "/", "/login").permitAll()
+                .requestMatchers("/manifest.json", "/serviceworker.js", "/assets/**", "css/**", "fonts/**", "/js/**", "/**").permitAll() //for dev only.
+                .anyRequest().authenticated()
+                .and()
+                .csrf(AbstractHttpConfigurer::disable);
+        return http.build();
+    }
+}
