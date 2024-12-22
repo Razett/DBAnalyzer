@@ -84,4 +84,15 @@ public final class PostgreSqlQuery {
                 ORDER BY table_name, c.ordinal_position NULLS FIRST;
                 """;
     }
+
+    public String schemaTableListQuery() {
+        return """
+                SELECT table_schema,\s
+                       array_agg(table_name ORDER BY table_name ASC) AS tables
+                FROM information_schema.tables
+                WHERE table_type = 'BASE TABLE'
+                GROUP BY table_schema
+                ORDER BY table_schema;
+                """;
+    }
 }

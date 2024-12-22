@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<th:block th:fragment="setContent(content)">
+<th:block th:fragment="setContent(content, script)">
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
@@ -8,6 +8,7 @@
   <link th:href="@{/css/main.css}" rel="stylesheet">
   <link th:href="@{/css/fontawesome.css}" rel="stylesheet">
   <link th:href="@{/css/solid.css}" rel="stylesheet">
+  <link th:href="@{/css/datatables.css}" rel="stylesheet">
   <style>
     #loader {
         transition: all 0.3s ease-in-out;
@@ -89,8 +90,9 @@
       </button>
 
       <!-- Main menu -->
-      <div class="collapse navbar-collapse justify-content-end mt-2 mt-sm-0 align-items-center" id="navbar-collapse">
+      <div class="collapse navbar-collapse justify-content-end mt-2 mt-lg-0 align-items-center" id="navbar-collapse">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <!-- Anayze -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle mx-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Analyze
@@ -99,6 +101,18 @@
               <li><h6 class="dropdown-header">Relation</h6></li>
               <li><a th:class="'dropdown-item ' + ${session.get('postgreInfo') == null ? 'disabled' : ''}" th:href="@{/analyze/postgre}">PostgreSQL</a></li>
               <li><a class="dropdown-item disabled" href="#">MariaDB</a></li>
+            </ul>
+          </li>
+
+          <!-- Query -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle mx-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Query
+            </a>
+            <ul class="dropdown-menu">
+              <li><h6 class="dropdown-header">Query Tools</h6></li>
+              <li><a th:class="'dropdown-item ' + ${session.get('postgreInfo') == null ? 'disabled' : ''}" th:href="@{/query/postgre}">PostgreSQL</a></li>
+              <li><a th:class="'dropdown-item ' + ${session.get('mariadbInfo') == null ? 'disabled' : 'disabled'}" th:href="@{/query/mariadb}">MariaDB</a></li>
             </ul>
           </li>
         </ul>
@@ -173,14 +187,32 @@
     </div>
   </div>
 
+  <div id="modal-container"></div>
 
+
+  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
   <script th:src="@{/js/bootstrap.bundle.js}"></script>
+  <script th:src="@{/js/datatables.js}"></script>
+  <script th:src="@{/js/modal.service.js}"></script>
   <script th:inline="javascript">
-      msg = [[${msg}]];
-      if (msg) {
-          window.alert(msg);
+      const modalService = new ModalService();
+
+      var title = [[${msg != null ? msg.title : msg}]];
+      if (title) {
+      } else {
+          title = 'Alert!';
       }
+
+      var msg = [[${msg != null ? msg.msg : msg}]];
+      if (msg) {
+          modalService.printAlertModal(title, msg);
+      }
+
+      const urlWithoutParams = window.location.origin + window.location.pathname;
+      window.history.replaceState(null, '', urlWithoutParams);
   </script>
+
+  <th:block th:replace="${script}"></th:block>
 </body>
 </html>
 </th:block>

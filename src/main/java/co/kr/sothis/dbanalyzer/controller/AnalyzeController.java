@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -27,24 +28,23 @@ public class AnalyzeController {
     public String postgre(HttpSession session, Model model, String result) {
         PostgreSqlConnInfo postgreSqlConnInfo = (PostgreSqlConnInfo) session.getAttribute("postgreInfo");
         if (postgreSqlConnInfo == null) {
-            return "redirect:/conn/postgre?msg=First you need to connect to the PostgreSQL server.";
+            return "redirect:/conn/postgre?title=Invalid!&msg=First you need to connect to the PostgreSQL server.";
         }
         return "/analyze/postgre";
     }
 
+    @ResponseBody
     @PostMapping("/postgre")
-    public String analyzePostgre(HttpSession session, RedirectAttributes redirectAttributes) {
+    public String analyzePostgre(HttpSession session) {
         PostgreSqlConnInfo postgreSqlConnInfo = (PostgreSqlConnInfo) session.getAttribute("postgreInfo");
         if (postgreSqlConnInfo != null) {
             try {
                 List<Column> columnList = postgreSqlService.getColumns(postgreSqlConnInfo);
-                String result = objectToCsv.columnToCsv(columnList);
-                redirectAttributes.addFlashAttribute("result", result);
-                return "redirect:/analyze/postgre";
+                return objectToCsv.columnToCsv(columnList);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return "redirect:/404";
+        return "Error! Please try again!";
     }
 }

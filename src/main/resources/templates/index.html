@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<th:block th:replace="~{/base/base::setContent(~{this::content})}">
+<th:block th:replace="~{/base/base::setContent(~{this::content}, ~{this::script})}">
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -8,6 +8,8 @@
 <body>
 <th:block th:fragment="content">
   index
+</th:block>
+<th:block th:fragment="script">
 </th:block>
 </body>
 </html>

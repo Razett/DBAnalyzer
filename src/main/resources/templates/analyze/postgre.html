@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<th:block th:replace="~{/base/base::setContent(~{this::content})}">
+<th:block th:replace="~{/base/base::setContent(~{this::content}, ~{this::script})}">
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -8,22 +8,71 @@
 <body>
 <th:block th:fragment="content">
   <div class="row">
-    <div class="bg-body-frame col-md-7 mb-4">
-      <h5>Analyze PostgreSQL</h5>
-      <span class="text-secondary text-break">Analyzes the schema correlation of the PostgreSQL server based on the logged in information. The file is saved as .csv</span>
+    <div class="col-md-7 mb-4">
+      <div class="bg-body-frame">
+        <h5>Analyze PostgreSQL</h5>
+        <span class="text-secondary text-break">Analyzes the schema correlation of the PostgreSQL server based on the logged in information. The file is saved as .csv</span>
+      </div>
     </div>
   </div>
+
   <div class="row">
-    <div class="bg-body-frame col-md-7 mb-4">
-      <form th:action="@{/analyze/postgre}" method="post">
-        <button type="submit" class="btn btn-primary">Analyze!</button>
-        <span class="text-secondary text-break ms-2">It will take few minutes.</span>
-      </form>
+    <div class="col-md-7 mb-4">
+      <div class="bg-body-frame">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <button type="submit" class="btn btn-primary" id="analyze-btn" onclick="analyzeOnClick(this)">Analyze!</button>
+            <span class="text-secondary text-break ms-2">It will take few minutes.</span>
+          </div>
+          <i class="fa-solid fa-circle-notch fa-spin fa-lg d-none" id="loading-icon"></i>
+          <i class="fa-solid fa-check fa-lg d-none text-success" id="complete-icon"></i>
+        </div>
+      </div>
     </div>
-    <div class="bg-body-frame col-md-7 mb-4">
-      <textarea class="form-control" th:text="${result != null ? result : 'Result'}" rows="15"></textarea>
+    <div class="col-md-7 mb-4">
+      <div class="bg-body-frame">
+        <textarea class="form-control" id="result-conatainer" rows="15" readonly>Results will be entered here.</textarea>
+      </div>
     </div>
   </div>
+</th:block>
+
+<th:block th:fragment="script">
+  <script th:src="@{/js/analyze.service.js}"></script>
+  <script>
+    var analyzeService = new AnalyzeService();
+
+    const loadingIcon = document.getElementById('loading-icon');
+    const completeIcon = document.getElementById('complete-icon');
+    const resultContainer = document.getElementById('result-conatainer');
+
+    function analyzeOnClick(element) {
+        element.classList.add('disabled');
+        loadingIcon.classList.remove('d-none');
+        completeIcon.classList.add('d-none');
+
+        analyzeService.analyzePostgre(function (data) {
+            resultContainer.innerText = data;
+            element.classList.remove('disabled');
+            loadingIcon.classList.add('d-none');
+            completeIcon.classList.remove('d-none');
+        });
+    }
+
+
+    resultContainer.addEventListener('click', async function () {
+      try {
+        const textToCopy = this.value;
+
+        await navigator.clipboard.writeText(textToCopy);
+
+        modalService.printAlertModal('Notifiation', 'Copied to clipboard.');
+      } catch (err) {
+        console.error('Clipboard copy failed.:', err);
+      }
+    });
+
+  </script>
 </th:block>
 </body>
 </html>

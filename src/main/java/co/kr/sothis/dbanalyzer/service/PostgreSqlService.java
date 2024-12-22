@@ -1,17 +1,15 @@
 package co.kr.sothis.dbanalyzer.service;
 
-import co.kr.sothis.dbanalyzer.dto.PostgreSqlConnInfo;
+import co.kr.sothis.dbanalyzer.dto.*;
 import co.kr.sothis.dbanalyzer.vo.PostgreSqlQuery;
-import co.kr.sothis.dbanalyzer.dto.Column;
 import co.kr.sothis.dbanalyzer.util.conn.PostgreSqlConnector;
 import co.kr.sothis.dbanalyzer.util.SqlUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -52,6 +50,61 @@ public class PostgreSqlService  {
         close();
 
         return columnList;
+    }
+
+    public QueryResult executeQuery(PostgreSqlConnInfo info, QueryInput queryInput) throws SQLException {
+        open(info);
+
+        ResultSet resultSet = sqlUtil.executeQuery(postgreConn, queryInput.getQuery());
+        ResultSetMetaData metaData = resultSet.getMetaData();
+
+        // 컬럼 수 가져오기
+        int columnCount = metaData.getColumnCount();
+
+        List<String> columnList = new ArrayList<>();
+
+        for (int i = 1; i <= columnCount; i++) {
+            columnList.add(metaData.getColumnName(i));
+        }
+        List<List<String>> dataList = new ArrayList<>();
+        while (resultSet.next()) {
+            List<String> data = new ArrayList<>();
+            for (int i = 1; i <= columnCount; i++) {
+                data.add(resultSet.getString(i));
+            }
+            dataList.add(data);
+        }
+
+        QueryResult queryResult = new QueryResult();
+        queryResult.setColumnList(columnList);
+        queryResult.setDataList(dataList);
+
+        return queryResult;
+    }
+
+    public List<TableList> getTableList(PostgreSqlConnInfo info) throws SQLException {
+        open(info);
+
+        ResultSet resultSet = sqlUtil.executeQuery(postgreConn, query.schemaTableListQuery());
+
+        List<TableList> schemaList = new ArrayList<>();
+        while (resultSet.next()) {
+            TableList tableList = new TableList();
+            tableList.setSchema(resultSet.getString("table_schema"));
+
+            Array tablesArray = resultSet.getArray("tables");
+            String[] tables;
+            if (tablesArray != null) {
+                Object[] objects = (Object[]) tablesArray.getArray();
+                tables = Arrays.stream(objects).map(Object::toString).toArray(String[]::new);
+            } else {
+                tables = new String[]{};
+            }
+            tableList.setTables(tables);
+            schemaList.add(tableList);
+        }
+
+        return schemaList;
     }
 
     private void open(PostgreSqlConnInfo info) throws SQLException {

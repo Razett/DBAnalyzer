@@ -19,7 +19,7 @@ public class MainController {
     @RequestMapping("/")
     public String index(HttpSession session, Model model) {
         if (session.getAttribute("postgreInfo") == null && session.getAttribute("mariadbInfo") == null) {
-            return "redirect:/conn/postgre?msg=You must connect to at least one database server.";
+            return "redirect:/conn/postgre?title=Error!&msg=You must connect to at least one database server.";
         } else {
             return "index";
         }

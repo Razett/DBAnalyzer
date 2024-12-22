@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<th:block th:replace="~{/base/base::setContent(~{this::content}, ~{this::script})}">
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<th:block th:fragment="content">
+  <div class="row">
+    <div class="col-md-4 mb-4">
+      <div>
+        <div class="bg-body-frame mb-4">
+          <h5>Query Tool for PostgreSQL</h5>
+          <span class="text-secondary text-break">A query execution tool for PostgreSQL.</span>
+        </div>
+
+        <div class="bg-body-frame h-100">
+          <ul class="" th:each="schema, i: ${tableList}">
+            <li class="fs-6 schema-name" th:text="${schema.schema}"></li>
+            <ul th:class="${i.last ? '' : 'd-none'}">
+              <li class="fs-8" th:each="table : ${schema.tables}" th:text="${table}"></li>
+            </ul>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8 mb-4">
+      <div class="bg-body-frame mb-4">
+        <div class="mb-3">
+          <textarea class="form-control" id="query-input" rows="4" placeholder="Input Query"></textarea>
+        </div>
+        <div class="d-flex align-items-center">
+          <button type="submit" class="btn btn-primary" id="execute-btn">Execute!</button>
+          <div class="ms-3">
+            <i class="fa-solid fa-circle-notch fa-spin fa-lg d-none" id="loading-icon"></i>
+            <i class="fa-solid fa-check fa-lg d-none text-success" id="complete-icon"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-body-frame">
+        <table class="table table-bordered table-hover compact nowrap order-column" id="datatables">
+          <thead id="result-head" class="table-secondary"></thead>
+          <tbody id="result-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+</th:block>
+
+<th:block th:fragment="script">
+  <script th:src="@{/js/query.service.js}"></script>
+  <script>
+    var queryService = new QueryService();
+
+    const loadingIcon = document.getElementById('loading-icon');
+    const completeIcon = document.getElementById('complete-icon');
+    const resultTableHead = document.getElementById('result-head');
+    const resultTableBody = document.getElementById('result-body');
+
+    $(document).ready(function () {
+        $('#query-input').on('change', function (e) {
+            completeIcon.classList.add('d-none');
+        });
+
+        $('#execute-btn').on('click', function (e) {
+            // UI
+            $('#execute-btn').addClass('disabled');
+            loadingIcon.classList.remove('d-none');
+            completeIcon.classList.add('d-none');
+
+            // Clear tableBody
+            resultTableBody.innerHTML = '';
+
+            // Get Query String
+            var queryString = $('#query-input').val();
+
+            // Ajax
+            queryService.executePostgre(queryString, function (data) {
+                if (data) {
+                    // Set Table Header
+                    var colHtml = '<tr>'
+                    for (var i = 0; i < data.columnList.length; i++) {
+                        colHtml += '<td>' + data.columnList[i] + '</td>\n';
+                    }
+                    colHtml += '</tr>'
+                    resultTableHead.innerHTML = colHtml;
+
+                    // if DataTable Already Exist, destroy it.
+                    if ($.fn.DataTable.isDataTable("#datatables")) {
+                        $('#datatables').DataTable().clear().destroy();
+                    }
+
+                    // Initialize DataTable
+                    $('#datatables').DataTable({
+                        data: data.dataList,
+                        "scrollX" : true,
+                        // dom: 'Bfrtip',
+                        layout: {
+                            topStart: {
+                                buttons: [
+                                    {
+                                        extend: 'pageLength',
+                                        className: 'form-select'
+                                    },
+                                    {
+                                        extend: 'excel',
+                                        text: '<i class="fa-solid fa-download fa-1x"></i>',
+                                        filename: 'export-1',
+                                        className: 'btn btn-outline-form ms-2',
+                                    }]
+                            }
+                        },
+                        lengthMenu: [20, 35, 50, 75, 100],
+                        pageLength: 20
+                    });
+                    loadingIcon.classList.add('d-none');
+                    completeIcon.classList.remove('d-none');
+                }
+                $('#execute-btn').removeClass('disabled');
+                loadingIcon.classList.add('d-none');
+            });
+        });
+    });
+
+  </script>
+  <script>
+      document.addEventListener('DOMContentLoaded', function () {
+
+          document.querySelectorAll('.schema-name').forEach(function (schemaName) {
+              schemaName.addEventListener('click', function () {
+                  const ulElement = schemaName.nextElementSibling;
+
+                  if (ulElement) {
+                      ulElement.classList.toggle('d-none');
+                  }
+              });
+          });
+      });
+  </script>
+</th:block>
+</body>
+</html>
+</th:block>
