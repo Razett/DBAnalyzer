@@ -16,7 +16,7 @@
         </div>
 
         <div class="bg-body-frame mb-4">
-          <div class="min-schema-h overflow-y-scroll overflow-x-scroll">
+          <div class="min-schema-h overflow-y-auto overflow-x-auto">
             <!-- Schema Name -->
             <ul class="schema-group top-schema" th:each="schema, i: ${tableList}">
               <li class="fs-6 schema-name d-flex mb-2">
@@ -71,7 +71,7 @@
       </div>
 
       <div class="bg-body-frame mb-4">
-        <div class="min-result-h overflow-y-scroll overflow-x-hidden">
+        <div class="min-result-h overflow-y-auto overflow-x-hidden">
           <table class="table table-bordered table-hover compact nowrap order-column" id="datatables">
             <thead id="result-head" class="table-secondary"></thead>
             <tbody id="result-body"></tbody>
@@ -248,12 +248,8 @@
                   } else { // 상세정보가 보이는 상태
                       colInfoArea.classList.add('d-none');
                   }
-
-
-
               });
           });
-
       });
   </script>
 </th:block>
