@@ -71,7 +71,7 @@
   --bs-dark-border-subtle: #adb5bd;
   --bs-white-rgb: 255, 255, 255;
   --bs-black-rgb: 0, 0, 0;
-  --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --bs-font-sans-serif: 'pretendard', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
   --bs-body-font-family: var(--bs-font-sans-serif);
@@ -13313,6 +13313,59 @@ http://scripts.sil.org/OFL
   .bg-body-frame-sm {
     padding: 0.875rem;
   }
+}
+
+.min-schema-h {
+  height: calc(100vh - 65px - 14rem);
+}
+
+.min-result-h {
+  height: calc(100vh - 65px - 20.75rem);
+}
+
+@media screen and (min-width: 768px) and (max-width: 928px) {
+  .min-schema-h {
+    height: calc(100vh - 49px - 16.4rem);
+  }
+
+  .min-result-h {
+    height: calc(100vh - 49px - 20.15rem);
+  }
+}
+
+@media screen and (min-width: 929px) and (max-width: 991px) {
+  .min-schema-h {
+    height: calc(100vh - 49px - 14.9rem);
+  }
+
+  .min-result-h {
+    height: calc(100vh - 49px - 20.15rem);
+  }
+}
+
+@media screen and (min-width: 992px) and (max-width: 1071px) {
+  .min-schema-h {
+    height: calc(100vh - 65px - 15.5rem);
+  }
+
+  .min-result-h {
+    height: calc(100vh - 65px - 20.75rem);
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .min-schema-h {
+    height: calc(100vh - 49px - 27.4rem);
+  }
+
+  .min-result-h {
+    height: calc(100vh - 49px - 20.75rem);
+  }
+}
+
+.schema-group {
+  margin-bottom: 0.5rem;
+  padding-left: 1rem;
 }
 
 
