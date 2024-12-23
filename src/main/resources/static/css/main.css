@@ -13365,7 +13365,60 @@ http://scripts.sil.org/OFL
 
 .schema-group {
   margin-bottom: 0.5rem;
-  padding-left: 1rem;
+  padding-left: 0;
 }
 
+.table-item {
+  margin-left: 1rem;
+}
+
+.table-item:hover {
+  background-color: var(--bs-secondary-bg);
+  border-radius: 0.375rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.schema-item:hover {
+  background-color: var(--bs-secondary-bg);
+  border-radius: 0.375rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.table-li {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+}
+
+.table-li > div > div > a {
+  text-decoration: none;
+}
+
+.table-li:hover {
+  background-color: var(--bs-secondary-bg);
+  border-radius: 0.375rem;
+}
+
+.table-li > div > a > i:hover {
+  color: var(--bs-primary);
+}
+
+.table-col-info {
+  padding-top: 0.125rem;
+  padding-left: 1.5rem;
+  padding-right: 1rem;
+}
+
+.table-col-info > table > tbody > tr {
+  border-bottom: 1px solid var(--bs-secondary-border-subtle);
+}
+
+.table-col-info > table > tbody > tr:last-child {
+  border-bottom: none;
+}
+
+.table-col-info > table > tbody > tr > td {
+  font-size: 0.825rem;
+}
 

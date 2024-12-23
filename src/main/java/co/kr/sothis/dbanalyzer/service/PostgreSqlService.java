@@ -1,6 +1,7 @@
 package co.kr.sothis.dbanalyzer.service;
 
 import co.kr.sothis.dbanalyzer.dto.*;
+import co.kr.sothis.dbanalyzer.mmapper.ColumnInfoMapper;
 import co.kr.sothis.dbanalyzer.vo.PostgreSqlQuery;
 import co.kr.sothis.dbanalyzer.util.conn.PostgreSqlConnector;
 import co.kr.sothis.dbanalyzer.util.SqlUtil;
@@ -19,6 +20,7 @@ public class PostgreSqlService  {
     private final SqlUtil sqlUtil;
     private final PostgreSqlQuery query;
     private final PostgreSqlConnector connector;
+    private final ColumnInfoMapper columnInfoMapper;
 
     private Connection postgreConn;
 
@@ -79,6 +81,8 @@ public class PostgreSqlService  {
         queryResult.setColumnList(columnList);
         queryResult.setDataList(dataList);
 
+        close();
+
         return queryResult;
     }
 
@@ -104,7 +108,37 @@ public class PostgreSqlService  {
             schemaList.add(tableList);
         }
 
+        close();
+
         return schemaList;
+    }
+
+    public TableInfo getTableInfo(PostgreSqlConnInfo info, TableInfo tableInfo) throws SQLException {
+        open(info);
+
+        String[] psValue = {tableInfo.getSchema(), tableInfo.getTableName()};
+        ResultSet resultSet = sqlUtil.executeQuery(postgreConn, query.tableInfoQuery(), psValue);
+
+        List<ColumnInfo> columnList = new ArrayList<>();
+
+        while (resultSet.next()) {
+            Column column = Column.builder()
+                    .columnName(resultSet.getString(1))
+                    .type(resultSet.getString(2))
+                    .length(resultSet.getString(3))
+                    .defaultValue(resultSet.getString(4))
+                    .nullable(resultSet.getString(5))
+                    .pk(resultSet.getString(6)).build();
+
+            columnList.add(columnInfoMapper.columnToColumnInfo(column));
+        }
+
+        TableInfo table = new TableInfo();
+        table.setColumns(columnList);
+
+        close();
+
+        return table;
     }
 
     private void open(PostgreSqlConnInfo info) throws SQLException {

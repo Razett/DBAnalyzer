@@ -16,11 +16,39 @@
         </div>
 
         <div class="bg-body-frame mb-4">
-          <div class="min-schema-h overflow-y-scroll">
-            <ul class="schema-group" th:each="schema, i: ${tableList}">
-              <li class="fs-6 schema-name" th:text="${schema.schema}"></li>
+          <div class="min-schema-h overflow-y-scroll overflow-x-scroll">
+            <!-- Schema Name -->
+            <ul class="schema-group top-schema" th:each="schema, i: ${tableList}">
+              <li class="fs-6 schema-name d-flex mb-2">
+                <div class="d-flex align-items-center schema-item">
+                  <i class="fa-solid fa-database fa-1x"></i>
+                  <span class="fs-6 ms-2" th:text="${schema.schema}"></span>
+                </div>
+              </li>
+              <!-- Table Name -->
               <ul th:class="${i.last ? '' : 'd-none'} + ' schema-group'">
-                <li class="fs-8" th:each="table : ${schema.tables}" th:text="${table}"></li>
+                <li class="fs-7 d-flex flex-column table-li" th:each="table : ${schema.tables}">
+                  <div class="d-flex justify-content-between align-items-center table-name-div">
+                    <div class="d-flex align-items-center table-item">
+                      <i class="fa-solid fa-table fa-1x"></i>
+                      <span class="ms-2 table-name" th:text="${table}"></span>
+                    </div>
+                    <!-- Table Util -->
+                    <div class="me-1">
+                      <a class="text-body search-icon" href="#">
+                        <i class="px-1 ti-search fa-1x"></i>
+                      </a>
+                      <a class="text-body info-icon" href="#">
+                        <i class="px-1 ti-info-alt fa-1x"></i>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="table-col-info d-none">
+                    <table class="columnInfo-table w-100">
+
+                    </table>
+                  </div>
+                </li>
               </ul>
             </ul>
           </div>
@@ -43,7 +71,7 @@
       </div>
 
       <div class="bg-body-frame mb-4">
-        <div class="min-result-h overflow-y-scroll">
+        <div class="min-result-h overflow-y-scroll overflow-x-hidden">
           <table class="table table-bordered table-hover compact nowrap order-column" id="datatables">
             <thead id="result-head" class="table-secondary"></thead>
             <tbody id="result-body"></tbody>
@@ -63,6 +91,7 @@
     const completeIcon = document.getElementById('complete-icon');
     const resultTableHead = document.getElementById('result-head');
     const resultTableBody = document.getElementById('result-body');
+    const queryInput = document.getElementById('query-input');
 
     $(document).ready(function () {
         $('#query-input').on('change', function (e) {
@@ -133,6 +162,7 @@
   <script>
       document.addEventListener('DOMContentLoaded', function () {
 
+          // 테이블 목록 확장 축소
           document.querySelectorAll('.schema-name').forEach(function (schemaName) {
               schemaName.addEventListener('click', function () {
                   const ulElement = schemaName.nextElementSibling;
@@ -142,6 +172,88 @@
                   }
               });
           });
+
+          // 테이블 명 div 더블 클릭 시 '스키마 명.테이블 명' 자동완성
+          document.querySelectorAll('.table-name-div').forEach(function (tableDiv) {
+              tableDiv.addEventListener('dblclick', function () {
+                  const tableText = tableDiv.querySelector('.table-name').innerText.trim();
+
+                  const schemaName = tableDiv.closest('.top-schema').querySelector('.schema-name').innerText.trim();
+
+                  queryInput.value += ` ${schemaName}.${tableText}`;
+              });
+          });
+
+          // search icon 클릭 시 select 문 자동완성
+          document.querySelectorAll('.search-icon').forEach(function (searchIcon) {
+              searchIcon.addEventListener('click', function (e) {
+                  e.preventDefault();
+
+                  const tableText = searchIcon.closest('.table-li').querySelector('.table-name').innerText.trim();
+
+                  const schemaName = searchIcon.closest('.top-schema').querySelector('.schema-name').innerText.trim();
+
+                  queryInput.value = `select * from ${schemaName}.${tableText}`;
+              });
+          });
+
+          // 테이블 명 클릭 시 테이블 내 컬럼, 타입, 길이 표시
+          document.querySelectorAll('.table-name').forEach(function (tableName) {
+              tableName.addEventListener('click', function () {
+                  const colInfoArea = tableName.closest('.table-li').querySelector('.table-col-info');
+
+                  if (colInfoArea.classList.contains('d-none')) { // 상세정보가 숨겨진 상태
+                    if (colInfoArea.classList.contains('loaded')) { // column 정보를 불러온 경우
+                        colInfoArea.classList.remove('d-none');
+                    } else { // column 정보를 불러온 적 없는 경우
+                      const tableText = tableName.innerText.trim();
+                      const schemaName = tableName.closest('.top-schema').querySelector('.schema-name').innerText.trim();
+
+                      queryService.tableInfoPostgre(schemaName, tableText, function (data) {
+                          if (data) {
+                              console.log(data);
+                              var html = '<tbody>\n'
+
+                              for (var i = 0; i < data.columns.length; i++) {
+                                  html += '<tr>\n'
+                                  if (data.columns[i].pk) {
+                                      html += '<td><i class="fa-solid fa-key fa-0825x"></i></td>\n'
+                                  } else {
+                                      html += '<td></td>\n'
+                                  }
+
+                                  html += '<td>' + data.columns[i].columnName + '</td>\n';
+                                  html += '<td>' + data.columns[i].type + '</td>\n';
+
+                                  if (data.columns[i].length) {
+                                    html += '<td>' + data.columns[i].length + '</td>\n';
+                                  } else {
+                                    html += '<td></td>\n';
+                                  }
+
+                                  if (data.columns[i].nullable) {
+                                      html += '<td><i class="fa-solid fa-n fa-0825x"></i></td>\n'
+                                  } else {
+                                      html += '<td></td>\n'
+                                  }
+                                  html += '</tr>';
+                              }
+                                  html += '</tbody>\n';
+                              colInfoArea.querySelector('.columnInfo-table').innerHTML = html;
+                              colInfoArea.classList.remove('d-none');
+                          }
+                      })
+                    }
+
+                  } else { // 상세정보가 보이는 상태
+                      colInfoArea.classList.add('d-none');
+                  }
+
+
+
+              });
+          });
+
       });
   </script>
 </th:block>

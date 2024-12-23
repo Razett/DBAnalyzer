@@ -23,7 +23,32 @@ var QueryService = (function () {
         })
     }
 
+    function tableInfoPostgre(schemaName, tableName, successCallback, errorCallback) {
+        $.ajax({
+            type: 'post',
+            url: '/query/postgre/tableinfo',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(
+                {
+                    schema: schemaName,
+                    tableName: tableName
+                }
+            ),
+            success: function (data) {
+                if (successCallback) {
+                    successCallback(data);
+                }
+            },
+            error: function (data) {
+                if (errorCallback) {
+                    errorCallback(data);
+                }
+            }
+        })
+    }
+
     return {
-        executePostgre: executePostgre
+        executePostgre: executePostgre,
+        tableInfoPostgre: tableInfoPostgre
     };
 })

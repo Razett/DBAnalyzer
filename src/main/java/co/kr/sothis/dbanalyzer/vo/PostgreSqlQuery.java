@@ -95,4 +95,48 @@ public final class PostgreSqlQuery {
                 ORDER BY table_schema;
                 """;
     }
+
+    public String tableInfoQuery() {
+        return """
+                WITH pk_columns AS (
+                    SELECT\s
+                        kcu.table_schema,
+                        kcu.table_name,
+                        kcu.column_name
+                    FROM\s
+                        information_schema.table_constraints tc
+                    JOIN\s
+                        information_schema.key_column_usage kcu
+                    ON\s
+                        tc.constraint_name = kcu.constraint_name
+                        AND tc.table_schema = kcu.table_schema
+                    WHERE\s
+                        tc.constraint_type = 'PRIMARY KEY'
+                )
+                SELECT\s
+                    c.column_name AS column_name,
+                    c.data_type AS data_type,
+                    COALESCE(c.character_maximum_length, c.numeric_precision) AS length,
+                    c.column_default AS default_value,
+                    c.is_nullable AS nullable,
+                    CASE\s
+                        WHEN pk.column_name IS NOT NULL THEN 'YES'
+                        ELSE 'NO'
+                    END AS is_primary_key
+                FROM\s
+                    information_schema.columns c
+                LEFT JOIN\s
+                    pk_columns pk
+                ON\s
+                    c.table_schema = pk.table_schema
+                    AND c.table_name = pk.table_name
+                    AND c.column_name = pk.column_name
+                WHERE\s
+                    c.table_schema = ?\s
+                    AND c.table_name = ?
+                ORDER BY\s
+                    c.ordinal_position;
+                
+                """;
+    }
 }

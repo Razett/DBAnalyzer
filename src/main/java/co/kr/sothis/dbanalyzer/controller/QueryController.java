@@ -1,9 +1,6 @@
 package co.kr.sothis.dbanalyzer.controller;
 
-import co.kr.sothis.dbanalyzer.dto.MessageContainer;
-import co.kr.sothis.dbanalyzer.dto.PostgreSqlConnInfo;
-import co.kr.sothis.dbanalyzer.dto.QueryInput;
-import co.kr.sothis.dbanalyzer.dto.QueryResult;
+import co.kr.sothis.dbanalyzer.dto.*;
 import co.kr.sothis.dbanalyzer.service.PostgreSqlService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +41,22 @@ public class QueryController {
         if (postgreSqlConnInfo != null) {
             try {
                 return postgreSqlService.executeQuery(postgreSqlConnInfo, queryInput);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        return null;
+    }
+
+    @ResponseBody
+    @PostMapping("/postgre/tableinfo")
+    public TableInfo postgreTableInfo(@RequestBody TableInfo tableInfo, Model model, HttpSession session) {
+        PostgreSqlConnInfo postgreSqlConnInfo = (PostgreSqlConnInfo) session.getAttribute("postgreInfo");
+
+        if (postgreSqlConnInfo != null) {
+            try {
+                return postgreSqlService.getTableInfo(postgreSqlConnInfo, tableInfo);
             } catch (SQLException e) {
                 e.printStackTrace();
                 return null;
