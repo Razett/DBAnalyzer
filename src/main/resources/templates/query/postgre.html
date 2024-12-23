@@ -112,7 +112,7 @@
 
             // Ajax
             queryService.executePostgre(queryString, function (data) {
-                if (data) {
+                if (data.columnList) {
                     // Set Table Header
                     var colHtml = '<tr>'
                     for (var i = 0; i < data.columnList.length; i++) {
@@ -151,6 +151,8 @@
                     });
                     loadingIcon.classList.add('d-none');
                     completeIcon.classList.remove('d-none');
+                } else {
+                    modalService.printAlertModal("Error!", data.error);
                 }
                 $('#execute-btn').removeClass('disabled');
                 loadingIcon.classList.add('d-none');

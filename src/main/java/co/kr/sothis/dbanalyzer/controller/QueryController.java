@@ -43,7 +43,7 @@ public class QueryController {
                 return postgreSqlService.executeQuery(postgreSqlConnInfo, queryInput);
             } catch (SQLException e) {
                 e.printStackTrace();
-                return null;
+                return QueryResult.builder().error(e.getMessage()).build();
             }
         }
         return null;

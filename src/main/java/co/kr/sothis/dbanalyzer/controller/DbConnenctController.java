@@ -70,4 +70,19 @@ public class DbConnenctController {
             return "redirect:/conn/mariadb?msg=" + e.getMessage();
         }
     }
+
+    @GetMapping("/disconn/postgre")
+    public String disconnectPostgre(Model model, HttpSession session) {
+        session.removeAttribute("postgreInfo");
+
+        return "redirect:/?title=Disconnected!&msg=Disconnected from PostgreSQL Server.";
+    }
+
+    @GetMapping("/disconn/mariadb")
+    public String disconnectMariaDB(Model model, HttpSession session) {
+        session.removeAttribute("mariadbInfo");
+
+        return "redirect:/?title=Disconnected!&msg=Disconnected from MariaDB Server.";
+    }
+
 }

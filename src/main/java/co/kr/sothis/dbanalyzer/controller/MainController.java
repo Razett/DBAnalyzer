@@ -1,5 +1,6 @@
 package co.kr.sothis.dbanalyzer.controller;
 
+import co.kr.sothis.dbanalyzer.dto.MessageContainer;
 import co.kr.sothis.dbanalyzer.vo.PostgreSqlQuery;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -17,7 +18,8 @@ public class MainController {
     private final PostgreSqlQuery postgreSqlQuery;
 
     @RequestMapping("/")
-    public String index(HttpSession session, Model model) {
+    public String index(HttpSession session, Model model, MessageContainer messageContainer) {
+        model.addAttribute("msg", messageContainer);
         if (session.getAttribute("postgreInfo") == null && session.getAttribute("mariadbInfo") == null) {
             return "redirect:/conn/postgre?title=Error!&msg=You must connect to at least one database server.";
         } else {
