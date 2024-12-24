@@ -7,18 +7,14 @@
 </head>
 <body>
   <th:block th:fragment="content">
-    <div class="row">
-      <div class="col-md-7 mb-4">
-        <div class="bg-body-frame">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5 col-xl-4 col-xxl-4">
+        <div class="bg-body-frame mb-4">
           <h5>Connect To MariaDB</h5>
           <span class="text-secondary text-break">Please enter the information required to connect MariaDB Server.</span>
         </div>
-      </div>
-    </div>
 
-    <div class="row">
-      <div class=" col-md-7">
-        <div class="bg-body-frame">
+        <div class="bg-body-frame mb-4">
           <form th:action="@{/conn/mariadb}" method="post" th:with="mariadbInfo=${session.get('mariadbInfo')}">
             <div class="row">
               <div class="mb-3 col-8">
@@ -49,6 +45,7 @@
           </form>
         </div>
       </div>
+
     </div>
   </th:block>
   <th:block th:fragment="script">
