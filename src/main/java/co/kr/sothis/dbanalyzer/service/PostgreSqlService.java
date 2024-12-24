@@ -141,6 +141,36 @@ public class PostgreSqlService  {
         return table;
     }
 
+    public TableInfo getTableInfoWithRefer(PostgreSqlConnInfo info, TableInfo tableInfo) throws SQLException {
+        open(info);
+
+        String[] psValue = {tableInfo.getSchema(), tableInfo.getTableName()};
+        ResultSet resultSet = sqlUtil.executeQuery(postgreConn, query.tableInfoWithReferQuery(), psValue);
+
+        List<ColumnInfo> columnList = new ArrayList<>();
+
+        while (resultSet.next()) {
+            Column column = Column.builder()
+                    .columnName(resultSet.getString(1))
+                    .type(resultSet.getString(2))
+                    .length(resultSet.getString(3))
+                    .defaultValue(resultSet.getString(4))
+                    .nullable(resultSet.getString(5))
+                    .pk(resultSet.getString(6))
+                    .referTable(resultSet.getString(7))
+                    .referColumn(resultSet.getString(8)).build();
+
+            columnList.add(columnInfoMapper.columnToColumnInfo(column));
+        }
+
+        TableInfo table = new TableInfo();
+        table.setColumns(columnList);
+
+        close();
+
+        return table;
+    }
+
     private void open(PostgreSqlConnInfo info) throws SQLException {
         if (postgreConn == null) {
             postgreConn = connector.getConnection(info);

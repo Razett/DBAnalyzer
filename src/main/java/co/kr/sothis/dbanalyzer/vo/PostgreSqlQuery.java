@@ -139,4 +139,78 @@ public final class PostgreSqlQuery {
                 
                 """;
     }
+
+    public String tableInfoWithReferQuery() {
+        return """
+                WITH pk_columns AS (
+                    SELECT
+                        kcu.table_schema,
+                        kcu.table_name,
+                        kcu.column_name
+                    FROM
+                        information_schema.table_constraints tc
+                    JOIN
+                        information_schema.key_column_usage kcu
+                    ON
+                        tc.constraint_name = kcu.constraint_name
+                        AND tc.table_schema = kcu.table_schema
+                    WHERE
+                        tc.constraint_type = 'PRIMARY KEY'
+                ),
+                fk_columns AS (
+                    SELECT
+                        kcu.table_schema,
+                        kcu.table_name,
+                        kcu.column_name,
+                        ccu.table_name AS refer_table,
+                        ccu.column_name AS refer_column
+                    FROM
+                        information_schema.table_constraints tc
+                    JOIN
+                        information_schema.key_column_usage kcu
+                    ON
+                        tc.constraint_name = kcu.constraint_name
+                        AND tc.table_schema = kcu.table_schema
+                    JOIN
+                        information_schema.constraint_column_usage ccu
+                    ON
+                        tc.constraint_name = ccu.constraint_name
+                        AND tc.table_schema = ccu.table_schema
+                    WHERE
+                        tc.constraint_type = 'FOREIGN KEY'
+                )
+                SELECT
+                    c.column_name AS column_name,
+                    c.data_type AS data_type,
+                    COALESCE(c.character_maximum_length, c.numeric_precision) AS length,
+                    c.column_default AS default_value,
+                    c.is_nullable AS nullable,
+                    CASE
+                        WHEN pk.column_name IS NOT NULL THEN 'YES'
+                        ELSE 'NO'
+                    END AS is_primary_key,
+                    fk.refer_table AS refer_table,
+                    fk.refer_column AS refer_column
+                FROM
+                    information_schema.columns c
+                LEFT JOIN
+                    pk_columns pk
+                ON
+                    c.table_schema = pk.table_schema
+                    AND c.table_name = pk.table_name
+                    AND c.column_name = pk.column_name
+                LEFT JOIN
+                    fk_columns fk
+                ON
+                    c.table_schema = fk.table_schema
+                    AND c.table_name = fk.table_name
+                    AND c.column_name = fk.column_name
+                WHERE
+                    c.table_schema = ?
+                    AND c.table_name = ?
+                ORDER BY
+                    c.ordinal_position;
+                
+                """;
+    }
 }

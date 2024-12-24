@@ -8,8 +8,64 @@
 <body>
 <th:block th:fragment="content">
   index
+  <button class="btn btn-primary" id="modal" data-bs-tablename="member">modal-test</button>
+
+  <div class="modal fade" tabindex="-1" id="table-info-modal" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="table-info-modal" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <i class="fa-solid fa-table"></i>
+          <h5 class="modal-title modal-table-name ms-2"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Tab List -->
+          <ul class="nav nav-tabs">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#" id="column-tab" data-bs-toggle="tab" data-bs-target="#column-tab-content" aria-controls="column-tab-content">
+                <i class="fa-solid fa-table-columns"></i>
+                Columns
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-tab-content" aria-controls="data-tab-content">
+                <i class="fa-solid fa-square-binary"></i>
+                Data
+              </a>
+            </li>
+          </ul>
+          <!-- Tab Content -->
+          <div class="tab-content" id="table-tab-content">
+            <!-- column Tab -->
+            <div class="tab-pane fade show active" id="column-tab-content" aria-labelledby="column-tab-content" tabindex="0">
+
+              <input class="form-check" type="checkbox" name="nullable" checked>
+            </div>
+            <!-- Data tab -->
+            <div class="tab-pane fade" id="data-tab-content" aria-labelledby="data-tab-content" tabindex="0"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </th:block>
 <th:block th:fragment="script">
+<script>
+
+  document.addEventListener('DOMContentLoaded', function () {
+
+      document.getElementById('modal').addEventListener('click', function (e) {
+          e.preventDefault();
+          const tableName = document.getElementById('modal').getAttribute('data-bs-tablename').trim().toUpperCase();
+
+          const modal = new bootstrap.Modal(document.getElementById('table-info-modal'));
+          document.getElementById('table-info-modal').querySelector('.modal-table-name').textContent = tableName;
+          modal.show();
+      });
+
+  })
+</script>
+<script th:src="@{/js/query.service.js}"></script>
 </th:block>
 </body>
 </html>

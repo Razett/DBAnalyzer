@@ -64,4 +64,20 @@ public class QueryController {
         }
         return null;
     }
+
+    @ResponseBody
+    @PostMapping("/postgre/tableinfo2")
+    public TableInfo postgreTableInfoWithRefer(@RequestBody TableInfo tableInfo, Model model, HttpSession session) {
+        PostgreSqlConnInfo postgreSqlConnInfo = (PostgreSqlConnInfo) session.getAttribute("postgreInfo");
+
+        if (postgreSqlConnInfo != null) {
+            try {
+                return postgreSqlService.getTableInfoWithRefer(postgreSqlConnInfo, tableInfo);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        return null;
+    }
 }

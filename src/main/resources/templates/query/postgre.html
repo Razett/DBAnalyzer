@@ -7,8 +7,8 @@
 </head>
 <body>
 <th:block th:fragment="content">
-  <div class="row h-100">
-    <div class="col-md-4">
+  <div class="row">
+    <div class="col-lg-5 col-xl-4 col-xxl-3">
       <div>
         <div class="bg-body-frame mb-4">
           <h5>Query Tool for PostgreSQL</h5>
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <div class="col-md-8">
+    <div class="col-lg-7 col-xl-8 col-xxl-9">
       <div class="bg-body-frame mb-4">
         <div class="mb-3">
           <textarea class="form-control" id="query-input" rows="4" placeholder="Input Query"></textarea>
@@ -80,6 +80,67 @@
       </div>
     </div>
 
+    <!-- Table Info Modal -->
+    <div class="modal fade" tabindex="-1" id="table-info-modal" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="table-info-modal" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <i class="fa-solid fa-table"></i>
+            <h5 class="modal-title modal-table-name ms-2"></h5>
+            <span class="modal-schema-name ms-2 fa-0875x text-secondary align-bottom"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Tab List -->
+            <ul class="nav nav-tabs">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#" id="column-tab" data-bs-toggle="tab" data-bs-target="#column-tab-content" aria-controls="column-tab-content">
+                  <i class="fa-solid fa-table-columns"></i>
+                  Columns
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-tab-content" aria-controls="data-tab-content">
+                  <i class="fa-solid fa-square-binary"></i>
+                  Data
+                </a>
+              </li>
+            </ul>
+            <!-- Tab Content -->
+            <div class="tab-content mt-1" id="table-tab-content">
+              <!-- column Tab -->
+              <div class="tab-pane fade show active overflow-x-auto" id="column-tab-content" aria-labelledby="column-tab-content" tabindex="0">
+                <table class="table table-sm table-bordered table-hover fa-0875x">
+                  <thead>
+                    <tr class="table-secondary text-center">
+                      <td>PK</td>
+                      <td>Column Name</td>
+                      <td>Type</td>
+                      <td>Length</td>
+                      <td>Nullable</td>
+                      <td>Default</td>
+                      <td>FK-Table</td>
+                      <td>FK-Column</td>
+                    </tr>
+                  </thead>
+                  <tbody id="column-info-tbody">
+
+                  </tbody>
+                </table>
+              </div>
+              <!-- Data tab -->
+              <div class="tab-pane fade" id="data-tab-content" aria-labelledby="data-tab-content" tabindex="0">
+                <table class="table table-bordered table-hover compact nowrap order-column" id="alldata-datatable">
+                  <thead id="table-alldata-head" class="table-secondary"></thead>
+                  <tbody id="table-alldata-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
 </th:block>
 
 <th:block th:fragment="script">
@@ -93,11 +154,20 @@
     const resultTableBody = document.getElementById('result-body');
     const queryInput = document.getElementById('query-input');
 
+    const tableInfoModalElement = document.getElementById('table-info-modal')
+    const tableInfoModal = new bootstrap.Modal(tableInfoModalElement);
+
+    const allDataTableHead = document.getElementById('table-alldata-head');
+    const allDataTableBody = document.getElementById('table-alldata-body');
+
     $(document).ready(function () {
+
+        // Query input 변경 감지
         $('#query-input').on('change', function (e) {
             completeIcon.classList.add('d-none');
         });
 
+        // Query execute
         $('#execute-btn').on('click', function (e) {
             // UI
             $('#execute-btn').addClass('disabled');
@@ -199,6 +269,118 @@
               });
           });
 
+          // info icon 클릭 시 테이블 정보 modal
+          document.querySelectorAll('.info-icon').forEach(function (infoIcon) {
+              infoIcon.addEventListener('click', function (e) {
+                  e.preventDefault();
+
+                  const tableText = infoIcon.closest('.table-li').querySelector('.table-name').innerText.trim();
+                  const schemaName = infoIcon.closest('.top-schema').querySelector('.schema-name').innerText.trim();
+
+                  tableInfoModalElement.querySelector('.modal-table-name').textContent = tableText;
+                  tableInfoModalElement.querySelector('.modal-schema-name').textContent = schemaName;
+
+                  var html = '';
+
+                  queryService.tableInfoWithReferPostgre(schemaName, tableText, function (data) {
+                      if (data) {
+                          for (var i = 0; i < data.columns.length; i++) {
+                              html += '<tr class="align-middle">';
+                              html += '<td class="text-center">' + (data.columns[i].pk ? '<i class="fa-solid fa-key fa-085x"></i>' : '') + '</td>';
+                              html += '<td>' + data.columns[i].columnName + '</td>';
+                              html += '<td class="text-center">' + queryService.postgreTypeDrawer(data.columns[i].type) + '</td>';
+
+                              html += '<td class="text-center"><input class="form-control text-center d-inline" type="number" name="length" style="width: 5rem" value="';
+                              if (data.columns[i].type === 'varchar') {
+                                  html += data.columns[i].length + '"></td>';
+                              } else {
+                                if (data.columns[i].length) {
+                                    html += data.columns[i].length + '" disabled></td>';
+                                } else {
+                                    html += '" disabled></td>';
+                                }
+                              }
+
+                              html += '<td class="text-center"><input class="form-check d-inline" type="checkbox" name="nullable" value="true" ';
+                              if (data.columns[i].pk) {
+                                  html += 'disabled></td>';
+                              } else {
+                                if (data.columns[i].nullable) {
+                                      html += 'checked></td>';
+                                } else {
+                                  html += '></td>';
+                                }
+                              }
+                              html += '<td>' + (data.columns[i].defaultValue ? data.columns[i].defaultValue : '') + '</td>';
+                              html += '<td>' + (data.columns[i].referTable ? data.columns[i].referTable : '') + '</td>';
+                              html += '<td>' + (data.columns[i].referColumn ? data.columns[i].referColumn : '') + '</td>';
+                              html += '</tr>';
+                          }
+                          // Reset Tab
+                          tableInfoModalElement.querySelector('#column-info-tbody').innerHTML = html;
+                          tableInfoModalElement.querySelector('#column-tab').setAttribute('aria-selected', 'true');
+                          tableInfoModalElement.querySelector('#column-tab').classList.add('active');
+                          tableInfoModalElement.querySelector('#data-tab').setAttribute('aria-selected', 'false');
+                          tableInfoModalElement.querySelector('#data-tab').classList.remove('active');
+                          tableInfoModalElement.querySelector('#column-tab-content').classList.add('active');
+                          tableInfoModalElement.querySelector('#column-tab-content').classList.add('show');
+                          tableInfoModalElement.querySelector('#data-tab-content').classList.remove('active');
+                          tableInfoModalElement.querySelector('#data-tab-content').classList.remove('show');
+
+                          tableInfoModal.show();
+                      }
+                  });
+              });
+          });
+
+          // Table info 모달 내 data 클릭 시 전체 데이터 쿼리
+          document.getElementById('data-tab').addEventListener('click', function () {
+              const tableText = tableInfoModalElement.querySelector('.modal-table-name').textContent;
+              const schemaName = tableInfoModalElement.querySelector('.modal-schema-name').textContent;
+
+              var queryString = `select * from ${schemaName}.${tableText} order by 1 asc`
+              queryService.executePostgre(queryString, function (data) {
+                  if (data.columnList) {
+                      // Set Table Header
+                      var colHtml = '<tr>'
+                      for (var i = 0; i < data.columnList.length; i++) {
+                          colHtml += '<td>' + data.columnList[i] + '</td>\n';
+                      }
+                      colHtml += '</tr>'
+                      allDataTableHead.innerHTML = colHtml;
+
+                      // if DataTable Already Exist, destroy it.
+                      if ($.fn.DataTable.isDataTable("#alldata-datatable")) {
+                          $('#alldata-datatable').DataTable().clear().destroy();
+                      }
+
+                      // Initialize DataTable
+                      $('#alldata-datatable').DataTable({
+                          data: data.dataList,
+                          "scrollX" : true,
+                          // dom: 'Bfrtip',
+                          layout: {
+                              topStart: {
+                                  buttons: [
+                                      {
+                                          extend: 'pageLength',
+                                          className: 'form-select'
+                                      },
+                                      {
+                                          extend: 'excel',
+                                          text: '<i class="fa-solid fa-download fa-1x"></i>',
+                                          filename: 'export-1',
+                                          className: 'btn btn-outline-form ms-2',
+                                      }]
+                              }
+                          },
+                          lengthMenu: [20, 35, 50, 75, 100],
+                          pageLength: 20
+                      });
+                  }
+              });
+          })
+
           // 테이블 명 클릭 시 테이블 내 컬럼, 타입, 길이 표시
           document.querySelectorAll('.table-name').forEach(function (tableName) {
               tableName.addEventListener('click', function () {
@@ -252,7 +434,7 @@
                   }
               });
           });
-      });
+      }); // Dom Ready End
   </script>
 </th:block>
 </body>

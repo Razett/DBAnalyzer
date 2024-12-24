@@ -13323,45 +13323,48 @@ http://scripts.sil.org/OFL
   height: calc(100vh - 65px - 20.75rem);
 }
 
-@media screen and (min-width: 768px) and (max-width: 928px) {
+/*@media screen and (min-width: 768px) and (max-width: 928px) {*/
+/*  .min-schema-h {*/
+/*    height: calc(100vh - 49px - 16.4rem);*/
+/*  }*/
+
+/*  .min-result-h {*/
+/*    height: calc(100vh - 49px - 20.15rem);*/
+/*  }*/
+/*}*/
+
+/*@media screen and (min-width: 929px) and (max-width: 991px) {*/
+/*  .min-schema-h {*/
+/*    height: calc(100vh - 49px - 14.9rem);*/
+/*  }*/
+
+/*  .min-result-h {*/
+/*    height: calc(100vh - 49px - 20.15rem);*/
+/*  }*/
+/*}*/
+
+/*@media screen and (max-width: 767px) {*/
+/*  .min-schema-h {*/
+/*    height: calc(100vh - 49px - 27.4rem);*/
+/*  }*/
+
+/*  .min-result-h {*/
+/*    height: calc(100vh - 49px - 20.75rem);*/
+/*  }*/
+/*}*/
+
+@media screen and (max-width: 991px) {
   .min-schema-h {
-    height: calc(100vh - 49px - 16.4rem);
+    height: auto;
+    max-height: calc(100vh - 49px - 7rem);
   }
 
   .min-result-h {
-    height: calc(100vh - 49px - 20.15rem);
+    height: auto;
+    max-height: calc(100vh - 49px - 5rem);
   }
 }
 
-@media screen and (min-width: 929px) and (max-width: 991px) {
-  .min-schema-h {
-    height: calc(100vh - 49px - 14.9rem);
-  }
-
-  .min-result-h {
-    height: calc(100vh - 49px - 20.15rem);
-  }
-}
-
-@media screen and (min-width: 992px) and (max-width: 1071px) {
-  .min-schema-h {
-    height: calc(100vh - 65px - 15.5rem);
-  }
-
-  .min-result-h {
-    height: calc(100vh - 65px - 20.75rem);
-  }
-}
-
-@media screen and (max-width: 767px) {
-  .min-schema-h {
-    height: calc(100vh - 49px - 27.4rem);
-  }
-
-  .min-result-h {
-    height: calc(100vh - 49px - 20.75rem);
-  }
-}
 
 .schema-group {
   margin-bottom: 0.5rem;
@@ -13422,3 +13425,13 @@ http://scripts.sil.org/OFL
   font-size: 0.825rem;
 }
 
+.column-type-toggler {
+  padding: var(--bs-navbar-toggler-padding-y) var(--bs-navbar-toggler-padding-x);
+  font-size: var(--bs-navbar-toggler-font-size);
+  line-height: 1;
+  color: var(--bs-navbar-color);
+  background-color: transparent;
+  border: 0 solid var(--bs-navbar-toggler-border-color);
+  border-radius: var(--bs-navbar-toggler-border-radius);
+  transition: var(--bs-navbar-toggler-transition);
+}

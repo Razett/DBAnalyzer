@@ -23,13 +23,13 @@ public class ColumnInfoMapper {
 
                 switch (type) {
                     case "bigint":
-                        return "int8";
+                        return "bigint";
                     case "character varying":
                         return "varchar";
                     case "smallint":
-                        return "int2";
+                        return "smallint";
                     case "integer":
-                        return "int4";
+                        return "integer";
                     case "character":
                         return "char";
                     case "timestamp without time zone":
